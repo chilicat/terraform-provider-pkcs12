@@ -4,7 +4,6 @@ bin
 
 
 terraform.lock.hcl
-vendor 
 *.log
 *.backup
 *.tfstate
