@@ -2,7 +2,7 @@
 terraform-provider-pkcs12
 bin
 
-
+.terraform.lock.hcl
 terraform.lock.hcl
 *.log
 *.backup
