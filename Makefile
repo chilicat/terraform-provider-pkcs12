@@ -3,7 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=chilicat
 NAME=pkcs12
 BINARY=terraform-provider-${NAME}
-VERSION=0.0.1
+VERSION=0.0.6
 OS_ARCH=darwin_amd64
 
 default: install
@@ -41,3 +41,5 @@ example_clean:
 
 example_run:
 	@cd examples && terraform init && terraform apply --auto-approve
+
+example_all: install example_clean example_run

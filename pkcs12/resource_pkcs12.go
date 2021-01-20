@@ -42,7 +42,12 @@ func resourcePkcs12() *schema.Resource {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
-				ForceNew:  true,
+				Default:   "",
+
+				// TODO: All fields are ForceNew or Computed w/out Optional, Update is superfluous
+				// Why is not possible to force new if optional is true?
+				// ForceNew: true,
+
 			},
 			"result": &schema.Schema{
 				Type:     schema.TypeString,

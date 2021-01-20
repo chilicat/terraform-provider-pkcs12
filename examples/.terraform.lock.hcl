@@ -2,10 +2,10 @@
 # Manual edits may be lost in future updates.
 
 provider "github.com/chilicat/pkcs12" {
-  version     = "0.2.0"
-  constraints = "0.2.0"
+  version     = "0.0.6"
+  constraints = "0.0.6"
   hashes = [
-    "h1:Hx4E8+91uJ2iWqSLfl9LlqkO/v9j4+pS/Hs4yVIKuBU=",
+    "h1:bx5QT4UnFRm9Go6C7TrIS2014C4hCYd9zjhPB50wCEg=",
   ]
 }
 

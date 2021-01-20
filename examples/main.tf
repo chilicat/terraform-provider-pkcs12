@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     pkcs12 = {
-      version = "0.2"
+      version = "0.0.6"
       source = "github.com/chilicat/pkcs12"
     }
   }
