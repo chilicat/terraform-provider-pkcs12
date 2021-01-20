@@ -24,21 +24,25 @@ func resourcePkcs12() *schema.Resource {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
+				ForceNew:  true,
 			},
 			"private_key_pem": &schema.Schema{
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
+				ForceNew:  true,
 			},
 			"password": &schema.Schema{
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
+				ForceNew:  true,
 			},
 			"ca_pem": &schema.Schema{
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
+				ForceNew:  true,
 			},
 			"result": &schema.Schema{
 				Type:     schema.TypeString,
