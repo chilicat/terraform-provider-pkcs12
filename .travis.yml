@@ -16,6 +16,7 @@ env:
 #- bash scripts/gogetcookie.sh
 
 script:
+- go mod vendor
 - make build
 
 branches:
