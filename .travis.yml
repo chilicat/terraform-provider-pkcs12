@@ -4,8 +4,7 @@ services:
 - docker
 language: go
 go:
-  - stable
-  - tip
+  - 1.15.x
 env:
   - GO111MODULE=on GOFLAGS=-mod=vendor
 
