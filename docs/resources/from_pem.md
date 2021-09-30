@@ -16,7 +16,7 @@ resource "pkcs12_from_pem" "my_pkcs12" {
   password = "mypassword"
   cert_pem = tls_self_signed_cert.my_cert.cert_pem
   private_key_pem  = tls_private_key.my_private_key.private_key_pem
-  ca = file("./ca.pem")
+  ca_pem = file("./ca.pem")
 }
 
 resource "local_file" "result" {
