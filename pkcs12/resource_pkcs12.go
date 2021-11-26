@@ -101,6 +101,9 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	res, err := pkcs12.Encode(rand.Reader, cert.PrivateKey, c1, caList, password)
+	if err != nil {
+		return diag.FromErr(err)
+	}	
 	d.SetId(hashForState("pkcs12_" + password + certStr + privatekey + caStr))
 	d.Set("result", base64.StdEncoding.EncodeToString(res))
 	return diags
