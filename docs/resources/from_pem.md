@@ -33,4 +33,4 @@ resource "local_file" "result" {
 
 ## Attribute Reference
 
-* `result` - The created PKCS12 archive (base64 ncoded)
+* `result` - The created PKCS12 archive (base64 encoded)
