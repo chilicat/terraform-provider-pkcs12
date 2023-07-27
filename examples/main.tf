@@ -1,20 +1,23 @@
 terraform {
   required_providers {
     pkcs12 = {
-      version = "0.0.6"
-      source = "github.com/chilicat/pkcs12"
+      source = "chilicat/pkcs12"
+      version = "0.1.0"
     }
   }
 }
 
-provider "pkcs12" {}
+provider "pkcs12" {
+  # Configuration options
+}
+
 
 resource "tls_private_key" "my_private_key" {
   algorithm = "RSA"
 }
 
 resource "tls_self_signed_cert" "my_cert" {
-  key_algorithm   = tls_private_key.my_private_key.algorithm
+  # key_algorithm   = tls_private_key.my_private_key.algorithm
   private_key_pem = tls_private_key.my_private_key.private_key_pem
   validity_period_hours = 58440
   early_renewal_hours = 5844
@@ -47,4 +50,5 @@ resource "local_file" "result" {
 
 output "my_pkcs12" {
   value = pkcs12_from_pem.my_pkcs12
+  sensitive = true
 }

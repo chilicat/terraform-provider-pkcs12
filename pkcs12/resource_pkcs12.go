@@ -83,7 +83,7 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	if len(privateKeys) != 1 {
-		return diag.FromErr(fmt.Errorf("private_key_pem must contain excatly one private key"))
+		return diag.FromErr(fmt.Errorf("private_key_pem must contain exactly one private key"))
 	}
 
 	// Read CA (chain), can be empty.

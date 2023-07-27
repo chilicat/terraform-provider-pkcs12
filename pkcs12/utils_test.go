@@ -302,3 +302,13 @@ func TestDecodePrivateKeysRSA(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestDecodePrivateBadString(t *testing.T) {
+
+	_, err := decodePrivateKeysFromPem([]byte("cdcdklmcdlkmcd\nxxsx\ncdcdc"), nil)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+}
