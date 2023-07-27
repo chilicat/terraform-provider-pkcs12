@@ -3,7 +3,6 @@ package pkcs12
 import (
 	"context"
 	"crypto/rand"
-	"crypto/tls"
 	"crypto/x509"
 
 	"encoding/base64"
@@ -20,36 +19,35 @@ func resourcePkcs12() *schema.Resource {
 		UpdateContext: resourcePkcs12Update,
 		DeleteContext: resourcePkcs12Delete,
 		Schema: map[string]*schema.Schema{
-			"cert_pem": &schema.Schema{
+			"cert_pem": {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
 				ForceNew:  true,
 			},
-			"private_key_pem": &schema.Schema{
+			"private_key_pem": {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
 				ForceNew:  true,
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
 				ForceNew:  true,
 			},
-			"ca_pem": &schema.Schema{
+			"ca_pem": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
 				Default:   "",
-
 				// TODO: All fields are ForceNew or Computed w/out Optional, Update is superfluous
 				// Why is not possible to force new if optional is true?
 				// ForceNew: true,
 
 			},
-			"result": &schema.Schema{
+			"result": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -59,52 +57,39 @@ func resourcePkcs12() *schema.Resource {
 
 func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var err error
 	certStr := d.Get("cert_pem").(string)
-	privatekey := d.Get("private_key_pem").(string)
+	privatekeyStr := d.Get("private_key_pem").(string)
 	password := d.Get("password").(string)
 	caStr := d.Get("ca_pem").(string)
 
-	var cert tls.Certificate
-
-	// Read certificate
-	if err := loadCertficates(&cert, []byte(certStr)); err != nil {
+	// Read certificate, given data must contain exactly one certificate.
+	certificate, err := decodeCertificate([]byte(certStr))
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Read private filekey
-	if err := loadCertficates(&cert, []byte(privatekey)); err != nil {
+	// Read private filekey, fails if given data does not contain any private key
+	privateKey, err := decodePrivateKeyFromPem([]byte(privatekeyStr))
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if cert.PrivateKey == "" {
-		return diag.Errorf("Cannot find private key")
-	}
-	// Read CA (chain)
-	var ca tls.Certificate
-	if caStr != "" {
-		if err := loadCertficates(&ca, []byte(caStr)); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
+	// Read CA (chain), can be empty.
 	var caList []*x509.Certificate
-	for _, c := range ca.Certificate {
-		c1, err := x509.ParseCertificate(c)
+	if caStr != "" {
+		caList, err = decodePemCA([]byte(caStr))
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		caList = append(caList, c1)
 	}
 
-	c1, err := x509.ParseCertificate(cert.Certificate[0])
+	res, err := pkcs12.Encode(rand.Reader, privateKey, certificate, caList, password)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	res, err := pkcs12.Encode(rand.Reader, cert.PrivateKey, c1, caList, password)
-	if err != nil {
-		return diag.FromErr(err)
-	}	
-	d.SetId(hashForState("pkcs12_" + password + certStr + privatekey + caStr))
+
+	d.SetId(hashForState("pkcs12_" + password + certStr + privatekeyStr + caStr))
 	d.Set("result", base64.StdEncoding.EncodeToString(res))
 	return diags
 }

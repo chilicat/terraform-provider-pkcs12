@@ -3,7 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=chilicat
 NAME=pkcs12
 BINARY=terraform-provider-${NAME}
-VERSION=0.0.6
+VERSION=0.0.8
 OS_ARCH=darwin_amd64
 
 default: install
