@@ -16,6 +16,7 @@ resource "pkcs12_from_pem" "my_pkcs12" {
   password = "mypassword"
   cert_pem = tls_self_signed_cert.my_cert.cert_pem
   private_key_pem  = tls_private_key.my_private_key.private_key_pem
+  # private_key_pass = "key-pass"
   ca_pem = file("./ca.pem")
 }
 
@@ -29,6 +30,7 @@ resource "local_file" "result" {
 * `password` - (Required) the archive password 
 * `cert_pem` - (Required) The certificate in PEM format
 * `private_key_pem` - (Required) The private key in PEM format
+* `private_key_pass` - (Optional) Password to decrypt private key
 * `ca_pem` - (Optional) The CA (chain) in PEM format
 
 ## Attribute Reference

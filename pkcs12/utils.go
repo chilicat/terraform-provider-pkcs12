@@ -60,36 +60,56 @@ func decodePemCA(raw []byte) ([]*x509.Certificate, error) {
 	return caList, nil
 }
 
-// decodePrivateKeyFromPem decodes a private key from the given PEM formated byte array.
-// It must contain excatly one private key. It must not contain any other certificate.
-func decodePrivateKeyFromPem(raw []byte) (crypto.PrivateKey, error) {
-	block, _ := pem.Decode(raw)
-	if block == nil {
-		return nil, fmt.Errorf("data does not contain a PrivateKey")
-	}
-	privateKey, err := parsePrivateKey(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("faild reading private key: %s", err)
-	}
-	return privateKey, nil
-}
-
-func parsePrivateKey(der []byte) (crypto.PrivateKey, error) {
-	if key, err := x509.ParsePKCS1PrivateKey(der); err == nil {
-		return key, nil
-	}
-	if key, err := x509.ParsePKCS8PrivateKey(der); err == nil {
-		switch key := key.(type) {
-		case *rsa.PrivateKey, *ecdsa.PrivateKey:
-			return key, nil
-		default:
-			return nil, fmt.Errorf("found unknown private key type in PKCS#8 wrapping")
+// decodePrivateKeysFromPem decodes a private keys from the given PEM formated byte array.
+func decodePrivateKeysFromPem(raw, password []byte) ([]crypto.PrivateKey, error) {
+	var keys []crypto.PrivateKey
+	for {
+		block, rest := pem.Decode(raw)
+		if block == nil {
+			break
 		}
+
+		blockRaw := block.Bytes
+		if x509.IsEncryptedPEMBlock(block) {
+			if len(password) == 0 {
+				return keys, fmt.Errorf("cannot decrypt PEM Block. Please provide a password for the private key")
+			}
+			decrypted, err := x509.DecryptPEMBlock(block, password)
+			if err != nil {
+				return keys, fmt.Errorf("cannot decrypt PEM Block: %s", err)
+			}
+			blockRaw = decrypted
+		}
+
+		switch block.Type {
+		case "RSA PRIVATE KEY":
+			key, err := x509.ParsePKCS1PrivateKey(blockRaw)
+			if err != nil {
+				return keys, err
+			}
+			keys = append(keys, key)
+		case "PRIVATE KEY":
+			key, err := x509.ParsePKCS8PrivateKey(blockRaw)
+			if err != nil {
+				return keys, nil
+			}
+			switch key := key.(type) {
+			case *rsa.PrivateKey, *ecdsa.PrivateKey:
+				keys = append(keys, key)
+			default:
+				return nil, fmt.Errorf("found unknown private key type in PKCS#8 wrapping")
+			}
+		case "EC PRIVATE KEY":
+			key, err := x509.ParseECPrivateKey(blockRaw)
+			if err != nil {
+				return keys, nil
+			}
+			keys = append(keys, key)
+		}
+		raw = rest
 	}
-	if key, err := x509.ParseECPrivateKey(der); err == nil {
-		return key, nil
-	}
-	return nil, fmt.Errorf("failed to parse private key")
+
+	return keys, nil
 }
 
 func hashForState(value string) string {

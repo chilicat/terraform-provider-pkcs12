@@ -2,6 +2,8 @@
 terraform-provider-pkcs12
 bin
 
+.vscode/
+
 .terraform.lock.hcl
 terraform.lock.hcl
 *.log

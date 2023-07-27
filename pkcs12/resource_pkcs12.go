@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/x509"
+	"fmt"
 
 	"encoding/base64"
 
@@ -30,6 +31,12 @@ func resourcePkcs12() *schema.Resource {
 				Required:  true,
 				Sensitive: true,
 				ForceNew:  true,
+			},
+			"private_key_pass": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+				Default:   "",
 			},
 			"password": {
 				Type:      schema.TypeString,
@@ -60,6 +67,7 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 	var err error
 	certStr := d.Get("cert_pem").(string)
 	privatekeyStr := d.Get("private_key_pem").(string)
+	privatekeyPass := d.Get("private_key_pass").(string)
 	password := d.Get("password").(string)
 	caStr := d.Get("ca_pem").(string)
 
@@ -70,9 +78,12 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	// Read private filekey, fails if given data does not contain any private key
-	privateKey, err := decodePrivateKeyFromPem([]byte(privatekeyStr))
+	privateKeys, err := decodePrivateKeysFromPem([]byte(privatekeyStr), []byte(privatekeyPass))
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if len(privateKeys) != 1 {
+		return diag.FromErr(fmt.Errorf("private_key_pem must contain excatly one private key"))
 	}
 
 	// Read CA (chain), can be empty.
@@ -84,7 +95,7 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 	}
 
-	res, err := pkcs12.Encode(rand.Reader, privateKey, certificate, caList, password)
+	res, err := pkcs12.Encode(rand.Reader, privateKeys[0], certificate, caList, password)
 	if err != nil {
 		return diag.FromErr(err)
 	}
