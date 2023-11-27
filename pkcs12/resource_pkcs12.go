@@ -2,6 +2,7 @@ package pkcs12
 
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
 
 	"encoding/base64"
@@ -60,7 +61,23 @@ func resourcePkcs12() *schema.Resource {
 	}
 }
 
-func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func decodeCerts(certStr []byte) (*x509.Certificate, []*x509.Certificate, error) {
+	certificates, err := decodeCertificates(certStr)
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(certificates) == 0 {
+		return nil, nil, fmt.Errorf("cert_pem must contains at least one certificate")
+	}
+	certificate := certificates[0]
+	caListAndIntermediate := []*x509.Certificate{}
+	if len(certificates) > 1 {
+		caListAndIntermediate = certificates[1:]
+	}
+	return certificate, caListAndIntermediate, nil
+}
+
+func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var err error
 	certStr := d.Get("cert_pem").(string)
@@ -69,15 +86,12 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 	password := d.Get("password").(string)
 	caStr := d.Get("ca_pem").(string)
 
-	certificates, err := decodeCertificates([]byte(certStr))
+	certificate, caListAndIntermediate, err := decodeCerts([]byte(certStr))
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if len(certificates) == 0 {
-		return diag.FromErr(fmt.Errorf("cert_pem must contains at least one certificate"))
-	}
-	certificate := certificates[0]
-	caListAndIntermediate := certificates[1:]
+
 	// Read private filekey, fails if given data does not contain any private key
 	privateKeys, err := decodePrivateKeysFromPem([]byte(privatekeyStr), []byte(privatekeyPass))
 	if err != nil {
@@ -100,7 +114,6 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	d.SetId(hashForState("pkcs12_" + password + certStr + privatekeyStr + caStr))
 	d.Set("result", base64.StdEncoding.EncodeToString(res))
 	return diags

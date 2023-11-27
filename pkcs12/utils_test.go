@@ -235,42 +235,42 @@ ogrIU+Z+JyIPd47DI8acKlzGeR2Wn5hQrdQApC0Ve2Lvmbz8Hj67pJ4=
 )
 
 func TestDecodeCertificateAllInOne(t *testing.T) {
-	list, err := decodeCertificates(allInOnePem)
+	cert, list, err := decodeCerts(allInOnePem)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	if len(list) != 3 {
+	if len(list) != 2 {
 		t.Log(len(list))
 		t.Error("certificate list must a certificate and ca's")
 		t.FailNow()
 	}
 
-	if list[0].IsCA {
+	if cert.IsCA {
 		t.Error("certificate[0] must not be a CA")
 	}
 
+	if !list[0].IsCA {
+		t.Error("certificate[0] must be a CA")
+	}
 	if !list[1].IsCA {
 		t.Error("certificate[1] must be a CA")
-	}
-	if !list[2].IsCA {
-		t.Error("certificate[2] must be a CA")
 	}
 
 }
 
 func TestDecodeCertificate(t *testing.T) {
-	list, err := decodeCertificates(certificateExample)
+	cert, list, err := decodeCerts(certificateExample)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	if len(list) != 1 {
-		t.Error("certificate list must contain one entry")
+	if len(list) != 0 {
+		t.Error("certificateExample must not contain any CAs")
 		t.FailNow()
 	}
 
-	if list[0].IsCA {
+	if cert.IsCA {
 		t.Error("certificate must not ba a CA")
 	}
 }
