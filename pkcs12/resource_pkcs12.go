@@ -67,7 +67,7 @@ func decodeCerts(certStr []byte) (*x509.Certificate, []*x509.Certificate, error)
 		return nil, nil, err
 	}
 	if len(certificates) == 0 {
-		return nil, nil, fmt.Errorf("cert_pem must contains at least one certificate")
+		return nil, nil, fmt.Errorf("cert_pem must contain at least one certificate")
 	}
 	certificate := certificates[0]
 	caListAndIntermediate := []*x509.Certificate{}
