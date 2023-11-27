@@ -14,15 +14,21 @@ import (
 
 // decodeCertificate decodes a certificate from a PEM formated byte array.
 // Given data must contain exactly one certificate.
-func decodeCertificate(raw []byte) (*x509.Certificate, error) {
+func decodeCertificates(raw []byte) ([]*x509.Certificate, error) {
 	certList, err := decodePemCertificates([]byte(raw))
 	if err != nil {
 		return nil, err
 	}
-	if len(certList) != 1 {
-		return nil, fmt.Errorf("cert_pem must contains exactly one certificate")
+
+	list := []*x509.Certificate{}
+	for _, v := range certList {
+		c, err := x509.ParseCertificate(v)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, c)
 	}
-	return x509.ParseCertificate(certList[0])
+	return list, nil
 }
 
 // decodePemCertificates decodes all certificates from a PEM formated byte array.

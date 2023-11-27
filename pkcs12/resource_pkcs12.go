@@ -2,8 +2,6 @@ package pkcs12
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/x509"
 	"fmt"
 
 	"encoding/base64"
@@ -71,12 +69,15 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 	password := d.Get("password").(string)
 	caStr := d.Get("ca_pem").(string)
 
-	// Read certificate, given data must contain exactly one certificate.
-	certificate, err := decodeCertificate([]byte(certStr))
+	certificates, err := decodeCertificates([]byte(certStr))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	if len(certificates) == 0 {
+		return diag.FromErr(fmt.Errorf("cert_pem must contains at least one certificate"))
+	}
+	certificate := certificates[0]
+	caListAndIntermediate := certificates[1:]
 	// Read private filekey, fails if given data does not contain any private key
 	privateKeys, err := decodePrivateKeysFromPem([]byte(privatekeyStr), []byte(privatekeyPass))
 	if err != nil {
@@ -87,15 +88,15 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	// Read CA (chain), can be empty.
-	var caList []*x509.Certificate
 	if caStr != "" {
-		caList, err = decodePemCA([]byte(caStr))
+		list, err := decodePemCA([]byte(caStr))
 		if err != nil {
 			return diag.FromErr(err)
 		}
+		caListAndIntermediate = append(caListAndIntermediate, list...)
 	}
 
-	res, err := pkcs12.Encode(rand.Reader, privateKeys[0], certificate, caList, password)
+	res, err := pkcs12.Modern.Encode(privateKeys[0], certificate, caListAndIntermediate, password)
 	if err != nil {
 		return diag.FromErr(err)
 	}

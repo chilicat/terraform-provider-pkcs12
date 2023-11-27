@@ -116,6 +116,10 @@ oiG8wKu6gq49wfjhoQ8T6WndG0EyE7rDQKd4xeCJXrEVFTBf6KLgjXpqY5ad
 -----END RSA PRIVATE KEY-----
 `)
 
+	allInOnePem = []byte(
+		string(certificateExample) + "\n" + string(caCert) + "\n",
+	)
+
 	certificateExample = []byte(`
 -----BEGIN CERTIFICATE-----
 MIIFGDCCAwACCQC8bLGIm8aWOzANBgkqhkiG9w0BAQsFADBOMQ0wCwYDVQQDDARt
@@ -230,13 +234,43 @@ ogrIU+Z+JyIPd47DI8acKlzGeR2Wn5hQrdQApC0Ve2Lvmbz8Hj67pJ4=
 `)
 )
 
-func TestDecodeCertificate(t *testing.T) {
-	c, err := decodeCertificate(certificateExample)
+func TestDecodeCertificateAllInOne(t *testing.T) {
+	list, err := decodeCertificates(allInOnePem)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	if c.IsCA {
+	if len(list) != 3 {
+		t.Log(len(list))
+		t.Error("certificate list must a certificate and ca's")
+		t.FailNow()
+	}
+
+	if list[0].IsCA {
+		t.Error("certificate[0] must not be a CA")
+	}
+
+	if !list[1].IsCA {
+		t.Error("certificate[1] must be a CA")
+	}
+	if !list[2].IsCA {
+		t.Error("certificate[2] must be a CA")
+	}
+
+}
+
+func TestDecodeCertificate(t *testing.T) {
+	list, err := decodeCertificates(certificateExample)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if len(list) != 1 {
+		t.Error("certificate list must contain one entry")
+		t.FailNow()
+	}
+
+	if list[0].IsCA {
 		t.Error("certificate must not ba a CA")
 	}
 }
