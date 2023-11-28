@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"strings"
 
 	"encoding/base64"
 
@@ -59,12 +60,12 @@ func resourcePkcs12() *schema.Resource {
 				// ForceNew: true,
 
 			},
-			"legacy": {
-				Type:        schema.TypeBool,
+			"encoding": {
+				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   false,
-				Default:     false,
-				Description: "Set to true to use legacy encoding",
+				Default:     "modern2023",
+				Description: "Set encoding",
 			},
 
 			"result": {
@@ -100,7 +101,11 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, _ interfa
 	password := d.Get("password").(string)
 	caStr := d.Get("ca_pem").(string)
 
-	legacy := d.Get("legacy").(bool)
+	encoding := d.Get("encoding").(string)
+	encoder := encodingMap[encoding]
+	if encoder == nil {
+		return diag.FromErr(fmt.Errorf("unsupported encoding: %q. Supported: %q", encoding, toKeys(encodingMap)))
+	}
 
 	certificate, caListAndIntermediate, err := decodeCerts([]byte(certStr))
 
@@ -126,17 +131,11 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, _ interfa
 		caListAndIntermediate = append(caListAndIntermediate, list...)
 	}
 
-	var res []byte
-	if legacy {
-		res, err = pkcs12.Legacy.Encode(privateKeys[0], certificate, caListAndIntermediate, password)
-	} else {
-		res, err = pkcs12.Modern.Encode(privateKeys[0], certificate, caListAndIntermediate, password)
-	}
-
+	res, err := encoder.Encode(privateKeys[0], certificate, caListAndIntermediate, password)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(hashForState("pkcs12_" + password + certStr + privatekeyStr + caStr))
+	d.SetId(hashForState("pkcs12_" + password + certStr + privatekeyStr + caStr + encoding))
 	d.Set("result", base64.StdEncoding.EncodeToString(res))
 	return diags
 }
@@ -152,4 +151,21 @@ func resourcePkcs12Update(ctx context.Context, d *schema.ResourceData, m interfa
 func resourcePkcs12Delete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	d.SetId("")
 	return nil
+}
+
+var (
+	encodingMap = map[string]*pkcs12.Encoder{
+		"modern":     pkcs12.Modern,
+		"modern2023": pkcs12.Modern2023,
+		"legacyDES":  pkcs12.LegacyDES,
+		"legacyRC2":  pkcs12.LegacyRC2,
+	}
+)
+
+func toKeys(m map[string]*pkcs12.Encoder) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return strings.Join(keys, ", ")
 }

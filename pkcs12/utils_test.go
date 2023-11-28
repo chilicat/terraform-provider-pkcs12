@@ -256,7 +256,6 @@ func TestDecodeCertificateAllInOne(t *testing.T) {
 	if !list[1].IsCA {
 		t.Error("certificate[1] must be a CA")
 	}
-
 }
 
 func TestDecodeCertificate(t *testing.T) {

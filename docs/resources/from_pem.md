@@ -32,7 +32,15 @@ resource "local_file" "result" {
 * `private_key_pem` - (Required) The private key in PEM format
 * `private_key_pass` - (Optional) Password to decrypt private key
 * `ca_pem` - (Optional) The CA (chain) in PEM format
+* `encoding` - (Optional) Defines keystore encoding. Default modern2023. Supported: modern (latest modern implementation, currently 2023), legacyDES, legacyRC2
 
 ## Attribute Reference
 
 * `result` - The created PKCS12 archive (base64 encoded)
+
+
+"modern":     pkcs12.Modern,
+		"modern2023": pkcs12.Modern2023,
+		"legacy":     pkcs12.Legacy,
+		"legacyDES":  pkcs12.LegacyDES,
+		"legacyRC2":  pkcs12.LegacyRC2,
