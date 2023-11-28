@@ -38,9 +38,3 @@ resource "local_file" "result" {
 
 * `result` - The created PKCS12 archive (base64 encoded)
 
-
-"modern":     pkcs12.Modern,
-		"modern2023": pkcs12.Modern2023,
-		"legacy":     pkcs12.Legacy,
-		"legacyDES":  pkcs12.LegacyDES,
-		"legacyRC2":  pkcs12.LegacyRC2,
