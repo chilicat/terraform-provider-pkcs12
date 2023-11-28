@@ -32,7 +32,7 @@ resource "local_file" "result" {
 * `private_key_pem` - (Required) The private key in PEM format
 * `private_key_pass` - (Optional) Password to decrypt private key
 * `ca_pem` - (Optional) The CA (chain) in PEM format
-* `encoding` - (Optional) Defines keystore encoding. Default modern2023. Supported: modern (latest modern implementation, currently 2023), legacyDES, legacyRC2
+* `encoding` - (Optional) Defines keystore encoding. Default `modern2023`. Supported: `modern` (latest modern implementation, currently 2023), `modern2023`, `legacyDES` and `legacyRC2`
 
 ## Attribute Reference
 
