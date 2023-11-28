@@ -19,40 +19,54 @@ func resourcePkcs12() *schema.Resource {
 		UpdateContext: resourcePkcs12Update,
 		DeleteContext: resourcePkcs12Delete,
 		Schema: map[string]*schema.Schema{
+
 			"cert_pem": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
-				ForceNew:  true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Sensitive:   true,
+				ForceNew:    true,
+				Description: "Certificate or certificate chain",
 			},
 			"private_key_pem": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
-				ForceNew:  true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Sensitive:   true,
+				ForceNew:    true,
+				Description: "Private Key",
 			},
 			"private_key_pass": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
-				Default:   "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Default:     "",
+				Description: "Private Key password",
 			},
 			"password": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
-				ForceNew:  true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Sensitive:   true,
+				ForceNew:    true,
+				Description: "Keystore password",
 			},
 			"ca_pem": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
-				Default:   "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Default:     "",
+				Description: "CA (or list of CAs)",
 				// TODO: All fields are ForceNew or Computed w/out Optional, Update is superfluous
 				// Why is not possible to force new if optional is true?
 				// ForceNew: true,
 
 			},
+			"legacy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Sensitive:   false,
+				Default:     false,
+				Description: "Set to true to use legacy encoding",
+			},
+
 			"result": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -86,6 +100,8 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, _ interfa
 	password := d.Get("password").(string)
 	caStr := d.Get("ca_pem").(string)
 
+	legacy := d.Get("legacy").(bool)
+
 	certificate, caListAndIntermediate, err := decodeCerts([]byte(certStr))
 
 	if err != nil {
@@ -110,7 +126,13 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, _ interfa
 		caListAndIntermediate = append(caListAndIntermediate, list...)
 	}
 
-	res, err := pkcs12.Modern.Encode(privateKeys[0], certificate, caListAndIntermediate, password)
+	var res []byte
+	if legacy {
+		res, err = pkcs12.Legacy.Encode(privateKeys[0], certificate, caListAndIntermediate, password)
+	} else {
+		res, err = pkcs12.Modern.Encode(privateKeys[0], certificate, caListAndIntermediate, password)
+	}
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
