@@ -155,10 +155,13 @@ func resourcePkcs12Delete(ctx context.Context, d *schema.ResourceData, m interfa
 
 var (
 	encodingMap = map[string]*pkcs12.Encoder{
-		"modern":     pkcs12.Modern,
-		"modern2023": pkcs12.Modern2023,
-		"legacyDES":  pkcs12.LegacyDES,
-		"legacyRC2":  pkcs12.LegacyRC2,
+		"modern":       pkcs12.Modern,
+		"modern2023":   pkcs12.Modern2023,
+		"modern2026":   pkcs12.Modern2026,
+		"legacy":       pkcs12.Legacy,
+		"legacyDES":    pkcs12.LegacyDES,
+		"legacyRC2":    pkcs12.LegacyRC2,
+		"passwordless": pkcs12.Passwordless,
 	}
 )
 

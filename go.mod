@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
-	software.sslmate.com/src/go-pkcs12 v0.4.0
+	software.sslmate.com/src/go-pkcs12 v0.7.1
 )
 
 require (
