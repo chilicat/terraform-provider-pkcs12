@@ -40,6 +40,7 @@ func resourcePkcs12() *schema.Resource {
 				Optional:    true,
 				Sensitive:   true,
 				Default:     "",
+				ForceNew:    true,
 				Description: "Private Key password",
 			},
 			"password": {
@@ -54,17 +55,15 @@ func resourcePkcs12() *schema.Resource {
 				Optional:    true,
 				Sensitive:   true,
 				Default:     "",
+				ForceNew:    true,
 				Description: "CA (or list of CAs)",
-				// TODO: All fields are ForceNew or Computed w/out Optional, Update is superfluous
-				// Why is not possible to force new if optional is true?
-				// ForceNew: true,
-
 			},
 			"encoding": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   false,
 				Default:     "modern2023",
+				ForceNew:    true,
 				Description: "Set encoding",
 			},
 
