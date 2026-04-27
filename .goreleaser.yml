@@ -1,3 +1,6 @@
+
+version: 2
+
 # Visit https://goreleaser.com for documentation on how to customize this
 # behavior.
 before:
@@ -38,7 +41,8 @@ checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
 signs:
-  - artifacts: checksum
+  - id: default
+    artifacts: checksums
     args:
       # if you are using this in a GitHub action or some other automated pipeline, you 
       # need to pass the batch flag to indicate its not interactive.
@@ -53,4 +57,4 @@ release:
   # If you want to manually examine the release before its live, uncomment this line:
   # draft: true
 changelog:
-  skip: true
+  disabled: true
