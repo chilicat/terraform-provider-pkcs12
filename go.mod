@@ -1,6 +1,6 @@
 module terraform-provider-pkcs12
 
-go 1.20
+go 1.25
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
