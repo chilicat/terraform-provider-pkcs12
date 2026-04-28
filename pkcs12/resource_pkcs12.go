@@ -17,7 +17,6 @@ func resourcePkcs12() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourcePkcs12Create,
 		ReadContext:   resourcePkcs12Read,
-		UpdateContext: resourcePkcs12Update,
 		DeleteContext: resourcePkcs12Delete,
 		Schema: map[string]*schema.Schema{
 
@@ -68,9 +67,9 @@ func resourcePkcs12() *schema.Resource {
 			},
 
 			"result": {
-				Type:     schema.TypeString,
-				Computed: true,
-                                Sensitive:   true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 		},
 	}
@@ -141,10 +140,6 @@ func resourcePkcs12Create(ctx context.Context, d *schema.ResourceData, _ interfa
 }
 
 func resourcePkcs12Read(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return nil
-}
-
-func resourcePkcs12Update(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	return nil
 }
 
