@@ -70,6 +70,7 @@ func resourcePkcs12() *schema.Resource {
 			"result": {
 				Type:     schema.TypeString,
 				Computed: true,
+                                Sensitive:   true,
 			},
 		},
 	}
