@@ -202,6 +202,12 @@ hczq27UIZwO/WqvmllOZ1EKkTAQUNzWS/wQpNa/5fGMDD6qUNdW3
 
 `)
 
+	ed25519PrivateKey = []byte(`
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEII2eh3Tl47rskUxNL8CE/05Ou9FvLu21gTHGDTNKFqdI
+-----END PRIVATE KEY-----
+`)
+
 	rsaKey = []byte(`
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEA72ObzM8bnHTCJj50djkEdF+TVlg8z7CkwSPjPANjXNhBWHVB
@@ -327,6 +333,15 @@ func TestDecodePrivateKeysEC(t *testing.T) {
 
 }
 
+func TestDecodePrivateKeysED25519(t *testing.T) {
+
+	_, err := decodePrivateKeysFromPem(ed25519PrivateKey, nil)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+}
 func TestDecodePrivateKeysRSA(t *testing.T) {
 
 	_, err := decodePrivateKeysFromPem(rsaKey, nil)

@@ -3,6 +3,7 @@ package pkcs12
 import (
 	"crypto"
 	"crypto/ecdsa"
+	"crypto/ed25519"
 	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/x509"
@@ -100,7 +101,7 @@ func decodePrivateKeysFromPem(raw, password []byte) ([]crypto.PrivateKey, error)
 				return keys, nil
 			}
 			switch key := key.(type) {
-			case *rsa.PrivateKey, *ecdsa.PrivateKey:
+			case *rsa.PrivateKey, *ecdsa.PrivateKey, ed25519.PrivateKey:
 				keys = append(keys, key)
 			default:
 				return nil, fmt.Errorf("found unknown private key type in PKCS#8 wrapping")
